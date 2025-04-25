@@ -1,0 +1,1 @@
+{"class":"org.apache.spark.ml.feature.OneHotEncoderModel","timestamp":1745568685220,"sparkVersion":"3.5.5","uid":"OneHotEncoder_c483d0acdc83","paramMap":{"inputCol":"companyIdx","outputCol":"companyVec","dropLast":false},"defaultParamMap":{"outputCol":"OneHotEncoder_c483d0acdc83__output","dropLast":true,"handleInvalid":"error"}}

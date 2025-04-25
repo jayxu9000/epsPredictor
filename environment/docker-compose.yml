@@ -1,0 +1,68 @@
+services:
+
+  airflow:
+    image: apache/airflow:latest
+    container_name: af
+    hostname: af
+    command: airflow standalone
+    ports:
+      - 8080:8080  # Airflow Web UI
+    networks:
+      - spark-network
+    volumes:
+      - ./dags:/opt/airflow/dags # connect local filesystem to container fs
+
+  spark-leader:
+    build: ./leader
+    container_name: spark-leader
+    hostname: spark-leader
+    environment:
+      - SPARK_MASTER_LOG=/opt/spark/logs
+    ports:
+      - 8081:8080  # Spark Leader UI
+      - 7077:7077  # Spark leader port
+      - 8050:8050 
+    volumes:
+      - ./work-dir:/opt/spark/work-dir # our work-dir stores Python Spark sessions
+      - ./output:/opt/spark/files/out  # leader/workers share a common directory in our filesystem
+      - ./input:/opt/spark/files/in    # accessing data files
+      - ./conf:/opt/spark/conf         # Spark configuration
+    networks:
+      - spark-network
+
+  spark-worker-1:
+    build: ./worker
+    container_name: spark-worker-1
+    hostname: spark-worker-1
+    # worker-1 connects to our leader
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-leader:7077
+    ports:
+      - 8082:8081 # Worker UI
+    volumes:
+      - ./input:/opt/spark/files/in 
+      - ./output:/opt/spark/files/out # leader/workers share a common directory in our filesystem
+    networks:
+      - spark-network
+    depends_on:
+      - spark-leader
+
+  spark-worker-2:
+    build: ./worker
+    container_name: spark-worker-2
+    hostname: spark-worker-2
+    # worker-2 connects to our leader
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-leader:7077
+    ports:
+      - 8083:8081 # Worker UI
+    volumes:
+      - ./input:/opt/spark/files/in 
+      - ./output:/opt/spark/files/out # leader/workers share a common directory in our filesystem
+    networks:
+      - spark-network
+    depends_on:
+      - spark-leader
+
+# this is a shared bridge network between all nodes
+networks:
+  spark-network:
+    driver: bridge
