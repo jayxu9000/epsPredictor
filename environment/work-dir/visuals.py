@@ -171,7 +171,7 @@ forecast_layout = html.Div(
             ],
             data=[],
             style_cell={"textAlign":"center"},
-            style_table={"width":"60%","margin":"20px auto"}
+            style_table={"width":"60%","margin":"20px"}
         ),
         dcc.Graph(id="future-graph", style={'width':'60%', "padding": "8px 16px",
                     "border": "1px solid #ccc",
